@@ -158,15 +158,20 @@ class AnsibullbotDatabase:
 
         '''Store the ratelimit json data by user/token'''
 
-        kwargs = {
-            'username': username,
-            'token': token,
-            'core_rate_limit': rawjson['resources']['core']['limit'],
-            'core_rate_limit_remaining': rawjson['resources']['core']['remaining'],
-            'rawjson': json.dumps(rawjson),
-            'query_counter': 0
-        }
+        if not rawjson or not isinstance(rawjson, dict):
+            logging.warning('Invalid rate limit data')
+            return None
+
         try:
+            kwargs = {
+                'username': username,
+                'token': token,
+                'core_rate_limit': rawjson.get('resources', {}).get('core', {}).get('limit', 0),
+                'core_rate_limit_remaining': rawjson.get('resources', {}).get('core', {}).get('remaining', 0),
+                'rawjson': json.dumps(rawjson),
+                'query_counter': 0
+            }
+            
             rl = RateLimit(**kwargs)
             self.session.merge(rl)
             self.session.flush()
@@ -174,7 +179,7 @@ class AnsibullbotDatabase:
 
             self.reset_rate_limit_query_counter(username=username, token=token)
         except Exception as e:
-            logging.error(e)
+            logging.error('Failed to set rate limit: %s', str(e))
             return None
 
     def get_rate_limit_remaining(self, username=None, token=None):

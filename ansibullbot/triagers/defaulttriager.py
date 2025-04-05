@@ -544,17 +544,27 @@ class DefaultTriager:
     def collect_repos(self):
         '''Populate the local cache of repos'''
         logging.info('start collecting repos')
-        for repo in C.DEFAULT_GITHUB_REPOS:
-            # skip repos based on args
-            if self.args.repo and self.args.repo != repo:
-                continue
-            if self.args.skiprepo:
-                if repo in self.args.skiprepo:
-                    continue
+        
+        # Override default repos if specific repo provided
+        if self.args.repo:
+            repos = [self.args.repo]
+        else:
+            repos = C.DEFAULT_GITHUB_REPOS
 
-            if self.args.pr:
-                numbers = self.eval_pr_param(self.args.pr)
-                self._collect_repo(repo, issuenums=numbers)
-            else:
-                self._collect_repo(repo)
+        for repo in repos:
+            # skip repos based on args
+            if self.args.skiprepo and repo in self.args.skiprepo:
+                continue
+
+            logging.info(f'Processing repo: {repo}')
+            try:
+                if self.args.pr:
+                    numbers = self.eval_pr_param(self.args.pr)
+                    self._collect_repo(repo, issuenums=numbers)
+                else:
+                    self._collect_repo(repo)
+            except Exception as e:
+                logging.error(f'Failed to collect repo {repo}: {str(e)}')
+                continue
+
         logging.info('finished collecting issues')

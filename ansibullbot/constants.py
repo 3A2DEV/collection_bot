@@ -191,6 +191,7 @@ p, CONFIG_FILE = load_config_file()
 # sections in config file
 DEFAULTS = 'defaults'
 AZP = 'azp'
+GHA = 'gha'
 
 
 # who dat?
@@ -330,6 +331,7 @@ DEFAULT_PICKLE_ISSUES = get_config(
 #   AZURE PIPELINES
 ###########################################
 
+# Make AZP configs optional when using GHA
 DEFAULT_AZP_ORG = get_config(
     p,
     AZP,
@@ -337,7 +339,7 @@ DEFAULT_AZP_ORG = get_config(
     '%s_AZP_ORG' % PROG_NAME.upper(),
     '',
     value_type='string'
-)
+) if DEFAULT_CI_PROVIDER == 'azp' else ''
 
 DEFAULT_AZP_PROJECT = get_config(
     p,
@@ -346,7 +348,7 @@ DEFAULT_AZP_PROJECT = get_config(
     '%s_AZP_PROJECT' % PROG_NAME.upper(),
     '',
     value_type='string'
-)
+) if DEFAULT_CI_PROVIDER == 'azp' else ''
 
 DEFAULT_AZP_USER = get_config(
     p,
@@ -373,6 +375,19 @@ DEFAULT_AZP_DEFINITION = get_config(
     '%s_AZP_DEFINITION' % PROG_NAME.upper(),
     None,
     value_type='int'
+)
+
+###########################################
+#   GITHUB ACTIONS
+###########################################
+
+DEFAULT_GHA_WORKFLOW = get_config(
+    p,
+    GHA,
+    'workflow',
+    '%s_GHA_WORKFLOW' % PROG_NAME.upper(),
+    'ansible-test.yml',
+    value_type='string'
 )
 
 ###########################################

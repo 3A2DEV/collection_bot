@@ -29,43 +29,33 @@ def get_rate_limit():
         url = 'https://api.github.com/rate_limit'
     else:
         url += '/rate_limit'
-    username = C.DEFAULT_GITHUB_USERNAME
-    password = C.DEFAULT_GITHUB_PASSWORD
     token = C.DEFAULT_GITHUB_TOKEN
 
-    if token:
-        while True:
-            logging.debug(url)
-            try:
-                rr = requests.get(
-                    url,
-                    headers={'Authorization': 'token %s' % token}
-                )
-                response = rr.json()
-                break
-            except Exception as e:
-                logging.error(e)
-                time.sleep(60)
+    if not token:
+        logging.error('No GitHub token provided')
+        return None
 
-    else:
-        while True:
-            logging.debug(url)
-            try:
-                rr = requests.get(
-                    url,
-                    auth=(username, password)
-                )
-                response = rr.json()
-                break
-            except Exception:
-                time.sleep(60)
+    while True:
+        logging.debug(url)
+        try:
+            rr = requests.get(
+                url,
+                headers={'Authorization': 'Bearer %s' % token}
+            )
+            if rr.status_code == 401:
+                logging.error('Invalid GitHub credentials')
+                return None
+            response = rr.json()
+            break
+        except Exception as e:
+            logging.error('Rate limit check failed: %s', str(e))
+            time.sleep(60)
 
     if 'resources' not in response or 'core' not in response.get('resources', {}):
-        logging.warning('Unable to fetch rate limit %r', response.get('message'))
-        return False
+        logging.warning('Unable to fetch rate limit: %s', response.get('message', 'unknown error'))
+        return None
 
-    ADB.set_rate_limit(username=username, token=token, rawjson=response)
-
+    ADB.set_rate_limit(token=token, rawjson=response)
     return response
 
 

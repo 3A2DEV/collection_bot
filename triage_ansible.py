@@ -37,8 +37,39 @@ sys.excepthook = handle_exception
 def main():
     initialize_sentry()
 
-    # Run the triager ...
-    AnsibleTriage(args=sys.argv[1:]).start()
+    # Set up logging
+    log_level = logging.DEBUG
+    log_format = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s'
+    
+    # Configure root logger
+    logging.basicConfig(
+        level=log_level,
+        format=log_format,
+        handlers=[
+            logging.StreamHandler()
+        ]
+    )
+
+    # Disable unwanted loggers
+    logging.getLogger('urllib3').setLevel(logging.WARNING)
+    logging.getLogger('requests').setLevel(logging.WARNING)
+    logging.getLogger('github').setLevel(logging.WARNING)
+    
+    # Create triager with disabled receiver
+    args = sys.argv[1:]
+    if '--verbose' in args:
+        args.remove('--verbose')  # Remove unsupported arg
+        
+    # Add default args to avoid receiver dependency
+    default_args = [
+        '--skip_no_update',
+        '--force',
+        '--ignore_galaxy'
+    ]
+    args.extend(default_args)
+    
+    triager = AnsibleTriage(args=args)
+    triager.start()
 
 
 if __name__ == "__main__":
