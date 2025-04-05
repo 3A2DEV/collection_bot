@@ -1,0 +1,8 @@
+-c constraints.txt
+
+jinja2
+pygithub
+PyYAML
+requests
+sentry-sdk
+sqlalchemy

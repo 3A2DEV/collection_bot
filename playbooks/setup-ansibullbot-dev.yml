@@ -1,0 +1,29 @@
+- name: Create dev ansibullbot instance
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  become: no
+
+  vars:
+    botinstance_name: ansibullbot-dev
+    botinstance_dns_entries:
+      - type: A
+        record: ansibullbot-dev.eng.ansible.com
+        value: "{{ elastic_ip.public_ip }}"
+
+  roles:
+    - ansibullbot_instance
+
+- name: Install dev ansibullbot
+  hosts: ansibullbot-dev.eng.ansible.com
+  become: yes
+
+  roles:
+    - repo_epel
+    - yum_cron
+    - firewall
+    - fail2ban
+    - mongodb
+    - caddy
+    - ansibullbot
+    - authorized_keys

@@ -1,0 +1,9 @@
+@{{ submitter }} This PR was evaluated as a potentially problematic PR for the following reasons:
+{% for reason in is_bad_pr_reason %}
+* {{ reason }}
+{% endfor %}
+
+Such PR can only be merged by human. Review the collection contributing guide to determine how to reach out to the collection maintainers for help.
+
+[click here for bot help](https://github.com/ansible-community/collection_bot/blob/devel/ISSUE_HELP.md)
+<!--- boilerplate: bad_pr --->
