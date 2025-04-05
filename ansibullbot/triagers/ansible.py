@@ -66,7 +66,7 @@ from ansibullbot.triagers.plugins.deprecation import get_deprecation_facts
 from ansibullbot.triagers.plugins.docs_info import get_docs_facts
 
 
-VALID_CI_PROVIDERS = frozenset(('azp',))
+VALID_CI_PROVIDERS = frozenset(('azp', 'gha'))
 
 
 class AnsibleActions(DefaultActions):
@@ -126,6 +126,8 @@ class AnsibleTriage(DefaultTriager):
 
         if self.args.ci == 'azp':
             from ansibullbot.ci.azp import AzurePipelinesCI as ci_class
+        elif self.args.ci == 'gha':
+            from ansibullbot.ci.gha import GitHubActionsCI as ci_class
         else:
             raise ValueError(
                 'Unknown CI provider specified in the config file: %s. Valid CI providers: %s' %
